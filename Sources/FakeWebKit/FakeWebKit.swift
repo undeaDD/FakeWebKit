@@ -74,16 +74,12 @@ public class WKUserContentController {
 
     public func removeScriptMessageHandler(forName name: String) {
         scriptMessageHandlers.removeValue(forKey: name)
-        Task { @MainActor [weak owner] in
-            owner?._updateJSBridgeBindings()
-        }
+        owner?._updateJSBridgeBindings()
     }
 
     public func add(_ scriptMessageHandler: any WKScriptMessageHandler, name: String) {
         scriptMessageHandlers[name] = scriptMessageHandler
-        Task { @MainActor [weak owner] in
-            owner?._updateJSBridgeBindings()
-        }
+        owner?._updateJSBridgeBindings()
     }
 }
 
@@ -140,7 +136,7 @@ public struct WKNavigation {
     }
 }
 
-public struct WKNavigationAction {
+public struct WKNavigationAction: Sendable {
     public let request: URLRequest
 
     @available(*, unavailable, message: "The navigationType property is not supported.")
@@ -149,7 +145,7 @@ public struct WKNavigationAction {
     }
 }
 
-public enum WKNavigationActionPolicy {
+public enum WKNavigationActionPolicy: Sendable {
     case allow
     case cancel
 
@@ -157,7 +153,6 @@ public enum WKNavigationActionPolicy {
     case download
 }
 
-@MainActor
 public protocol WKNavigationDelegate : NSObjectProtocol {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation)
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation, withError error: Error)
@@ -169,7 +164,6 @@ public protocol WKNavigationDelegate : NSObjectProtocol {
 
 // MARK: - ✅ - WKWebView ( without WebKit )
 
-@MainActor
 public class WKWebView: UIView {
     fileprivate var _webView: AnyObject?
     fileprivate var _delegateProxy: _DelegateProxy?
@@ -339,7 +333,6 @@ fileprivate extension WKWebView {
         }
     }
 
-    @MainActor
     func _updateJSBridgeBindings() {
         let handlerNames = configuration.userContentController.scriptMessageHandlers.keys
         let bridgeJS = """
@@ -402,7 +395,6 @@ fileprivate extension WKWebView {
 }
 
 @objc
-@MainActor
 fileprivate class _DelegateProxy: NSObject {
     fileprivate weak var owner: WKWebView?
 
@@ -499,30 +491,29 @@ fileprivate class _DelegateProxy: NSObject {
 
         WKWebView.logger?.log("Navigation request: \(request.url?.absoluteString ?? "nil") (Type: \(navigationType))")
 
-        let action = WKNavigationAction(request: request)
-        var decision: WKNavigationActionPolicy = .allow
-        let semaphore = DispatchSemaphore(value: 0)
+        final class DecisionBox: @unchecked Sendable {
+            var value: WKNavigationActionPolicy = .allow
+        }
 
-        // Call on main thread if we're not already there
+        let box = DecisionBox()
+        let semaphore = DispatchSemaphore(value: 0)
+        let action = WKNavigationAction(request: request)
+
+        let handler: @Sendable (WKNavigationActionPolicy) -> Void = { policy in
+            box.value = policy
+            semaphore.signal()
+        }
+
         if Thread.isMainThread {
-            owner.navigationDelegate?.webView(owner, decidePolicyFor: action) { policy in
-                decision = policy
-                semaphore.signal()
-            }
+            owner.navigationDelegate?.webView(owner, decidePolicyFor: action, decisionHandler: handler)
         } else {
             DispatchQueue.main.async {
-                owner.navigationDelegate?.webView(owner, decidePolicyFor: action) { policy in
-                    decision = policy
-                    semaphore.signal()
-                }
+                owner.navigationDelegate?.webView(owner, decidePolicyFor: action, decisionHandler: handler)
             }
         }
 
-        let timeout = DispatchTime.now() + .seconds(5)
-        if semaphore.wait(timeout: timeout) == .timedOut {
-            WKWebView.logger?.log("Decision timeout → defaulting to ALLOW")
-        }
-
+        _ = semaphore.wait(timeout: .now() + 5)
+        let decision = box.value
         WKWebView.logger?.log("Decision: \(decision == .allow ? "ALLOW" : "CANCEL")")
         return decision == .allow
     }
