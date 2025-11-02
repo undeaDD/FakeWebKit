@@ -424,13 +424,9 @@ fileprivate class _DelegateProxy: NSObject {
             return
         }
 
-        do {
-            owner._updateJSBridgeBindings()
-            let count = owner._injectUserScripts(at: .atDocumentStart)
-            WKWebView.logger?.log("Injected \(count) user scripts at document start")
-        } catch let error {
-            WKWebView.logger?.logError("Failed injecting scripts at document start: \(error)")
-        }
+        owner._updateJSBridgeBindings()
+        let count = owner._injectUserScripts(at: .atDocumentStart)
+        WKWebView.logger?.log("Injected \(count) user scripts at document start")
 
         owner.navigationDelegate?.webView(owner, didStartProvisionalNavigation: WKNavigation())
     }
@@ -443,13 +439,9 @@ fileprivate class _DelegateProxy: NSObject {
             return
         }
 
-        do {
-            owner._updateJSBridgeBindings()
-            let count = owner._injectUserScripts(at: .atDocumentEnd)
-            WKWebView.logger?.log("Injected \(count) user scripts at document end")
-        } catch let error {
-            WKWebView.logger?.logError("Failed injecting scripts at document end: \(error)")
-        }
+        owner._updateJSBridgeBindings()
+        let count = owner._injectUserScripts(at: .atDocumentEnd)
+        WKWebView.logger?.log("Injected \(count) user scripts at document end")
 
         owner.navigationDelegate?.webView(owner, didFinish: WKNavigation())
     }
