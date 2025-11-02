@@ -54,11 +54,3 @@ configuration.userContentController.addUserScript(testScript)
 // Load a URL
 webView.load(URLRequest(url: URL(string: "https://example.com")!))
 ```
-
-## Contributing
-
-Contributions are welcome! Open an issue or PR for bug fixes, improvements, or new features.
-
-## License
-
-MIT License.
