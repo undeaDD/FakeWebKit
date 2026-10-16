@@ -2,8 +2,8 @@
 // Package: FakeWebKit
 // Author: undeaDD
 // Repository: https://github.com/undeaDD/FakeWebKit
-// License: MIT
-// Version: 0.0.1
+// License: GPL-3.0-or-later
+// Version: 1.0.1
 
 import PackageDescription
 
@@ -23,6 +23,10 @@ let package = Package(
     targets: [
         .target(
             name: "FakeWebKit"
-        )
+        ),
+        .testTarget(
+            name: "FakeWebKitTests",
+            dependencies: ["FakeWebKit"]
+        ),
     ]
 )

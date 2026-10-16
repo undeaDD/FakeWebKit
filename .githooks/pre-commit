@@ -1,0 +1,27 @@
+#!/bin/zsh
+# pre-commit: no em dashes or emoji in added lines, SwiftLint clean (0 warnings) and all tests green.
+# Lint and tests only run when Swift code, the package or the lint config changed.
+# Emergency skip: git commit --no-verify
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+print "> Text rules ..."
+python3 scripts/check_text.py --staged
+print "ok No em dashes or emoji"
+
+if ! git diff --cached --name-only --diff-filter=ACMRD | grep -qE '\.swift$|^\.swiftlint\.yml$'; then
+  exit 0
+fi
+
+print "> SwiftLint ..."
+if ! command -v swiftlint >/dev/null; then
+  print -u2 "x SwiftLint is missing: brew install swiftlint"
+  exit 1
+fi
+if ! swiftlint lint --strict --quiet; then
+  print -u2 "x SwiftLint reported violations"
+  exit 1
+fi
+print "ok SwiftLint clean"
+
+scripts/test.sh

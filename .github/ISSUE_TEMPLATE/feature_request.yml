@@ -1,0 +1,30 @@
+name: Missing WebKit API
+description: Ask for a WKWebView / WebKit API that FakeWebKit doesn't bridge yet
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        FakeWebKit only mirrors API that exists in WebKit, so the same code compiles on iOS and tvOS.
+        Features that WKWebView doesn't have are out of scope.
+  - type: input
+    id: api
+    attributes:
+      label: WebKit API
+      description: Name and link to the Apple documentation.
+      placeholder: WKWebView.pageZoom, https://developer.apple.com/documentation/webkit/...
+    validations:
+      required: true
+  - type: textarea
+    id: usage
+    attributes:
+      label: How do you use it?
+      description: The code that currently needs `#if !os(tvOS)`.
+      render: swift
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Ideas how UIWebView could support it, known limitations.

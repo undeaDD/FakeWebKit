@@ -1,0 +1,5 @@
+#!/bin/zsh
+# commit-msg: no Co-authored-by trailers, no emoji, no em dashes in the commit message.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+python3 scripts/check_text.py --message "$1"

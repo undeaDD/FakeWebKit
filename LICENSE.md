@@ -11,7 +11,7 @@ of this license document, but changing it is not allowed.
 
 The GNU General Public License is a free, copyleft license for software and other kinds of works.
 
-The licenses for most software and other practical works are designed to take away your freedom to share and change the works. By contrast, the GNU General Public License is intended to guarantee your freedom to share and change all versions of a program—to make sure it remains free software for all its users.  
+The licenses for most software and other practical works are designed to take away your freedom to share and change the works. By contrast, the GNU General Public License is intended to guarantee your freedom to share and change all versions of a program, to make sure it remains free software for all its users.  
 
 You can copy, distribute, and modify this software under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
@@ -52,7 +52,7 @@ It is safest to attach them to the start of each source file to convey the exclu
 
 ---
 
-FakeWebKit — tvOS WKWebView wrapper / drop-in replacement
+FakeWebKit - tvOS WKWebView wrapper / drop-in replacement
 Copyright (C) 2025 DevsForge ( undeaDD )
 
 This program is free software: you can redistribute it and/or modify
