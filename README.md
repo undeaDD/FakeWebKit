@@ -122,8 +122,17 @@ FakeWebKit additions that WebKit doesn't have:
 - `evaluateJavaScript` runs the script through an indirect `eval`, so top-level `let` and `const` declarations
   don't persist between calls (`var` and functions do).
 - `removeData(ofTypes:)` removes cookies and cached responses. Other storage types are ignored.
+- All web views share `HTTPCookieStorage.shared` and `URLCache.shared`. There is no
+  `WKWebsiteDataStore.nonPersistent()`, every store works on the same app-wide cookie jar.
+- `customUserAgent` is applied through the app-wide `UserAgent` user default, so it can affect every web view
+  in the app, not just the one it was set on.
+- `callAsyncJavaScript` arguments must be JSON values (strings, numbers, booleans, arrays, dictionaries, `NSNull`).
+- `WKNavigation` is a value type, so navigations can't be compared by identity. `didCommit` fires when the new
+  document's JavaScript context exists.
+- `WKScriptMessage` has no `frameInfo`, and `WKNavigationAction` has no `sourceFrame`.
 - When a policy decision does not arrive synchronously (an async delegate on tvOS 25 or older, or a
   completion handler that is called later), the main-frame load is paused and restarted once the delegate allows it.
+  Subframe loads can't be paused and continue without waiting for the decision.
 
 ## Changelog
 
